@@ -2,6 +2,7 @@ import SocketServer
 import threading
 import requests
 import socket
+import json
 
 class RequestServerThread(threading.Thread):
     def __init__(self, port, distributed_graph):
@@ -18,7 +19,8 @@ class RequestServerThread(threading.Thread):
         while not done:
             connection, address = server_socket.accept()
             request_string = self.read_request(connection)
-            if request_string == "quit":
+            if self.is_quit_request(request_string):
+                connection.send('{"code":"OK"}')
                 connection.close()
                 done = True
             else:
@@ -41,3 +43,14 @@ class RequestServerThread(threading.Thread):
                 request += c
                 run_count = 0
         return request
+
+    def is_quit_request(self, request_string):
+        try:
+            code = json.loads(request_string)["code"]
+            print code
+            if code == "Quit":
+                return True
+            else:
+                return False
+        except:
+            return False

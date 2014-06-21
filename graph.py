@@ -13,3 +13,10 @@ class DistributedGraph:
         bucketId = node_id % len(self.bucket_map)
         server = self.bucket_map[bucketId]
         return server
+
+    def get_server_list(self):
+        result = []
+        for server in self.bucket_map:
+            if server not in result:
+                result.append(server)
+        return result

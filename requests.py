@@ -9,6 +9,8 @@ def parse_request(request_string):
         code = request_dict["code"]
         if code == "BucketMapUpdate":
             request = BucketMapUpdateRequest(request_dict)
+        elif code == "ServerList":
+            request = ServerListRequest()
         else:
             request = InvalidRequest()
     except:
@@ -30,4 +32,11 @@ class BucketMapUpdateRequest:
     def process(self, distributed_graph):
         distributed_graph.update_bucket_map(self.bucket_map)
         response = {"code": "OK"}
+        return json.dumps(response)
+
+
+class ServerListRequest:
+    def process(self, distributed_graph):
+        server_list = distributed_graph.get_server_list()
+        response = {"code": "OK", "server_list": server_list}
         return json.dumps(response)

@@ -5,9 +5,11 @@ import socket
 import sys
 import time
 
+import client
 import main
 import json
 from daemon import Daemon
+
 
 class HDBDaemon(Daemon):
     def run(self):
@@ -20,11 +22,11 @@ class HDBDaemon(Daemon):
 def is_port_open(address, port):
     s = socket.socket()
     try:
-        s.connect((address, port))
+        s.bind((address, port))
         s.close()
-        return False
-    except socket.error, e:
         return True
+    except socket.error, e:
+        return False
 
 
 def find_open_port(start_from):
@@ -41,16 +43,11 @@ def get_bucket_map(ports):
 
 
 def send_bucket_map(hostname, port, bucket_map):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((hostname, port))
     msg = {"code": "BucketMapUpdate", "bucket_map": bucket_map}
-    s.send(json.dumps(msg) + "$$$")
 
-    response = json.loads(s.recv(1024))
+    response = client.request(hostname, port, msg)
     if response["code"] != "OK":
         print "Error in sending bucket map to (localhost, %d)" % (port, )
-
-    s.close()
 
 
 if __name__ == "__main__":
