@@ -45,5 +45,5 @@ and each of the servers have the same copy of bucket2server.
 Request Protocol
 ----------------
 
-Each request to a server a json document followed by $$$.
+Each request to a server a json document followed by an empty line.
 
