@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import client
+from hdb import client
 import sys
 
 if __name__ == "__main__":
@@ -10,7 +10,7 @@ if __name__ == "__main__":
     for server in response["server_list"]:
         print "Shutting down (%s, %d) ..." % (server[0], server[1])
         try:
-            result = client.request(server[0], server[1], {"code": "Quit"})
+            result = client.request(tuple(server), {"code": "Quit"})
             if result["code"] == "OK":
                 print "OK."
             else:

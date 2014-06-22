@@ -5,8 +5,8 @@ import socket
 import sys
 import time
 
-import client
-import main
+from hdb import client
+from hdb import main
 import json
 from daemon import Daemon
 
