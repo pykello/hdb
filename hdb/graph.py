@@ -44,6 +44,7 @@ class LocalGraph:
         self.graph = {}
         self.node_count = 0
         self.rel_count = 0
+        self.max_degree = 0
 
     def add_relation(self, source_id, rel_type_id, target_id):
         if self.rel_count == self.rel_count_max:
@@ -58,5 +59,6 @@ class LocalGraph:
 
         self.graph[source_id].add((rel_type_id, target_id))
         self.rel_count += 1
+        self.max_degree = max(self.max_degree, len(self.graph[source_id]))
 
         return True
