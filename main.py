@@ -9,11 +9,15 @@ DEFAULT_REL_COUNT_MAX = 10000
 
 def main(argv):
     port, node_count_max, rel_count_max = parse_args(argv)
-    distributed_graph = graph.DistributedGraph(node_count_max, rel_count_max)
-    server_thread = request_server.RequestServerThread(port, distributed_graph)
+    local_addr = ('localhost', port)
+    distributed_graph = graph.DistributedGraph(node_count_max, rel_count_max,
+                                               local_addr)
+    server_thread = request_server.RequestServerThread(local_addr,
+                                                       distributed_graph)
 
     server_thread.start()
     server_thread.join()
+    sys.exit(0)
 
 
 def parse_args(argv):

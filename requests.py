@@ -11,6 +11,8 @@ def parse_request(request_string):
             request = BucketMapUpdateRequest(request_dict)
         elif code == "ServerList":
             request = ServerListRequest()
+        elif code == "RelationAdd":
+            request = RelationAddRequest(request_dict)
         else:
             request = InvalidRequest()
     except:
@@ -39,4 +41,14 @@ class ServerListRequest:
     def process(self, distributed_graph):
         server_list = distributed_graph.get_server_list()
         response = {"code": "OK", "server_list": server_list}
+        return json.dumps(response)
+
+
+class RelationAddRequest:
+    def __init__(self, request):
+        self.relation = request["relation"]
+
+    def process(self, distributed_graph):
+        result = distributed_graph.add_relation(*self.relation)
+        response = {"code": "OK", "added": result}
         return json.dumps(response)

@@ -45,7 +45,7 @@ def get_bucket_map(ports):
 def send_bucket_map(hostname, port, bucket_map):
     msg = {"code": "BucketMapUpdate", "bucket_map": bucket_map}
 
-    response = client.request(hostname, port, msg)
+    response = client.request((hostname, port), msg)
     if response["code"] != "OK":
         print "Error in sending bucket map to (localhost, %d)" % (port, )
 

@@ -6,7 +6,7 @@ import sys
 if __name__ == "__main__":
     port = int(sys.argv[1])
 
-    response = client.request('localhost', port, {"code": "ServerList"})
+    response = client.request(('localhost', port), {"code": "ServerList"})
     for server in response["server_list"]:
         print "Shutting down (%s, %d) ..." % (server[0], server[1])
         try:

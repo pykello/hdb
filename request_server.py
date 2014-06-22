@@ -5,14 +5,14 @@ import socket
 import json
 
 class RequestServerThread(threading.Thread):
-    def __init__(self, port, distributed_graph):
+    def __init__(self, local_addr, distributed_graph):
         super(RequestServerThread, self).__init__()
         self.distributed_graph = distributed_graph
-        self.port = port
+        self.local_addr = local_addr
 
     def run(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind(('localhost', self.port))
+        server_socket.bind(self.local_addr)
         server_socket.listen(1)
 
         done = False
