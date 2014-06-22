@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import os
 import socket
 import sys
@@ -51,9 +52,15 @@ def send_bucket_map(hostname, port, bucket_map):
 
 
 if __name__ == "__main__":
-    instance_count = int(sys.argv[1])
-    node_max = sys.argv[2]
-    rel_max = sys.argv[3]
+    parser = argparse.ArgumentParser(description='HDB launch script')
+    parser.add_argument('instance_count', action='store', type=int)
+    parser.add_argument('node_count_max', action='store', type=int)
+    parser.add_argument('rel_count_max', action='store', type=int)
+    
+    args = parser.parse_args()
+    instance_count = args.instance_count
+    node_count_max = args.node_count_max
+    rel_count_max = args.rel_count_max
 
     port = 5430
     ports = []
@@ -62,7 +69,8 @@ if __name__ == "__main__":
         pid = os.fork()
         if pid == 0:
             daemon = HDBDaemon(stderr='/tmp/hdb.err', stdout='/tmp/hdb.out')
-            daemon.set_args(['main.py', str(port), node_max, rel_max])
+            daemon.set_args(['main.py', str(port), str(node_count_max),
+                             str(rel_count_max)])
             daemon.start()
         else:
             print port

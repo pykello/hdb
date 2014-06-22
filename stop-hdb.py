@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
 from hdb import client
+import argparse
 import sys
 
 if __name__ == "__main__":
-    port = int(sys.argv[1])
+    parser = argparse.ArgumentParser(description='HDB stop script')
+    parser.add_argument('port', action='store', type=int)
+    
+    args = parser.parse_args()
+    port = args.port
 
     response = client.request(('localhost', port), {"code": "ServerList"})
     for server in response["server_list"]:

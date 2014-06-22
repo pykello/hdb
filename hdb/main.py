@@ -1,10 +1,7 @@
+import argparse
 import sys
 import graph
 import request_server
-
-
-DEFAULT_NODE_COUNT_MAX = 1000
-DEFAULT_REL_COUNT_MAX = 10000
 
 
 def main(argv):
@@ -21,16 +18,14 @@ def main(argv):
 
 
 def parse_args(argv):
-    port = int(argv[1])
+    parser = argparse.ArgumentParser(description='HDB - distributed graph database')
+    parser.add_argument('port', action='store', type=int)
+    parser.add_argument('node_count_max', action='store', type=int)
+    parser.add_argument('rel_count_max', action='store', type=int)
 
-    try:
-        node_count_max = int(argv[2])
-        rel_count_max = int(argv[3])
-    except:
-        node_count_max = DEFAULT_REL_COUNT_MAX
-        rel_count_max = DEFAULT_REL_COUNT_MAX
-
-    return port, node_count_max, rel_count_max
+    args = parser.parse_args(argv[1:])
+    
+    return args.port, args.node_count_max, args.rel_count_max
 
 
 if __name__ == "__main__":
