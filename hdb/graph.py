@@ -24,6 +24,9 @@ class DistributedGraph:
         return result
 
     def add_relation(self, source_id, rel_type_id, target_id):
+        source_id = int(source_id)
+        rel_type_id = int(rel_type_id)
+        target_id = int(target_id)
         server_addr = self.locate_node(source_id)
 
         if server_addr == self.local_addr:
