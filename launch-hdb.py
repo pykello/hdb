@@ -78,7 +78,7 @@ if __name__ == "__main__":
             ports.append(port)
             port += 1
 
-    time.sleep(2)
+    time.sleep(1)
 
     bucket_map = get_bucket_map(ports)
     for port in ports:
