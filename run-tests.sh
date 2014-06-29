@@ -1,11 +1,12 @@
 #!/bin/sh
 
-read -a tests <<< `cat test-schedule.txt`
+tests_string=`cat test-schedule.txt`
+read -a tests <<< $tests_string
 
 passed_count=0
 failed_count=0
 
-for test in $tests
+for test in "${tests[@]}"
 do
     echo "Running '$test' ..."
     source tests/$test.sh > /tmp/hdb-test.out
