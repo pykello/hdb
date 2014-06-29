@@ -73,7 +73,8 @@ if __name__ == "__main__":
                              str(rel_count_max)])
             daemon.start()
         else:
-            print port
+            sys.stdout.write("%d\n" % (port,))
+            sys.stdout.flush()
             ports.append(port)
             port += 1
 
