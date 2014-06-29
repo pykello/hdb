@@ -9,10 +9,14 @@ def parse_request(request_string):
         code = request_dict["code"]
         if code == "BucketMapUpdate":
             request = BucketMapUpdateRequest(request_dict)
+        elif code == "BucketMapGet":
+            request = BucketMapGetRequest()
         elif code == "ServerList":
             request = ServerListRequest()
         elif code == "RelationAdd":
             request = RelationAddRequest(request_dict)
+        elif code == "RelationBatchAdd":
+            request = RelationBatchAddRequest(request_dict)
         elif code == "LocalStat":
             request = LocalStatRequest()
         else:
@@ -39,6 +43,12 @@ class BucketMapUpdateRequest:
         return json.dumps(response)
 
 
+class BucketMapGetRequest:
+    def process(self, distributed_graph):
+        response = {"code": "OK", "bucket_map": distributed_graph.get_bucket_map()}
+        return json.dumps(response)
+
+
 class ServerListRequest:
     def process(self, distributed_graph):
         server_list = distributed_graph.get_server_list()
@@ -52,6 +62,19 @@ class RelationAddRequest:
 
     def process(self, distributed_graph):
         result = distributed_graph.add_relation(*self.relation)
+        response = {"code": "OK", "added": result}
+        return json.dumps(response)
+
+
+class RelationBatchAddRequest:
+    def __init__(self, request):
+        self.relations = request["relations"]
+
+    def process(self, distributed_graph):
+        result = 0
+        for rel in self.relations:
+            if distributed_graph.add_relation(*rel):
+                result += 1
         response = {"code": "OK", "added": result}
         return json.dumps(response)
 

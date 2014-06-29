@@ -11,6 +11,9 @@ class DistributedGraph:
     def update_bucket_map(self, bucket_map):
         self.bucket_map = bucket_map
 
+    def get_bucket_map(self):
+        return self.bucket_map
+
     def locate_node(self, node_id):
         bucketId = node_id % len(self.bucket_map)
         server = self.bucket_map[bucketId]
