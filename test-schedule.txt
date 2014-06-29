@@ -1,2 +1,3 @@
 test-launch
 test-load-1
+test-load-2

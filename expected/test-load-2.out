@@ -1,0 +1,15 @@
+Loading ...
+Loaded 6
+Getting statistics ...
+${ports[0]}
+Nodes: 0 (0%)
+Relationships: 0 (0%)
+Max Degree: 0
+${ports[1]}
+Nodes: 1 (10%)
+Relationships: 3 (3%)
+Max Degree: 3
+Shutting down (localhost, ${ports[0]}) ...
+OK.
+Shutting down (localhost, ${ports[1]}) ...
+OK.
