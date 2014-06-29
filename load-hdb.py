@@ -2,6 +2,7 @@
 
 from hdb import client
 import argparse
+import os
 import sys
 
 BATCH_SIZE = 1000
@@ -57,11 +58,20 @@ def locate_node(node_id, bucket_map):
 
 def flush_rel_queue(rel_queue, bucket_map):
     loaded = 0
+    child_pids = []
 
     for server, rels in rel_queue.items():
-        add_request = {"code": "RelationBatchAdd", "relations": rels}
-        result = client.request(server, add_request)
-        loaded += result["added"]
+        pid = os.fork()
+        if pid == 0:
+            add_request = {"code": "RelationBatchAdd", "relations": rels}
+            result = client.request(server, add_request)
+            sys.exit(0)
+        else:
+            child_pids.append(pid)
+        loaded += len(rels)
+
+    for pid in child_pids:
+        os.waitpid(pid, 0)
 
     return loaded
 
