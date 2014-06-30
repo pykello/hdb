@@ -21,3 +21,17 @@ def read_response(connection):
             break
     return response
 
+
+def get_bucket_map(server):
+    bucket_map_request = {"code": "BucketMapGet"}
+    bucket_map_response = request(server, bucket_map_request)
+    bucket_map = bucket_map_response["bucket_map"]
+
+    return bucket_map
+
+
+def locate_node(node_id, bucket_map):
+    bucketId = node_id % len(bucket_map)
+    server = bucket_map[bucketId]
+    return tuple(server)
+
