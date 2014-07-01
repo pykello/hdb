@@ -7,7 +7,10 @@ def parse_request(request_string):
         "ServerList": ServerListRequest,
         "RelationAdd": RelationAddRequest,
         "RelationBatchAdd": RelationBatchAddRequest,
-        "LocalStat": LocalStatRequest
+        "LocalStat": LocalStatRequest,
+        "QueryExecute": QueryExecuteRequest,
+        "QueryStatus": QueryStatusRequest,
+        "QueryResult": QueryResultRequest,
     }
 
     request = None
@@ -93,4 +96,40 @@ class LocalStatRequest(BaseRequest):
                         "node_count_max": local_graph.node_count_max,
                         "rel_count_max": local_graph.rel_count_max,
                     }
+        return json.dumps(response)
+
+
+class QueryExecuteRequest(BaseRequest):
+    def process(self, distributed_graph, executor):
+        response = {
+            "code": "OK",
+            "job_id": 1
+        }
+
+        return json.dumps(response)
+
+
+class QueryStatusRequest(BaseRequest):
+    def __init__(self, request):
+        self.job_id = request["job_id"]
+
+    def process(self, distributed_graph, executor):
+        response = {
+            "code": "OK",
+            "status": "Failed"
+        }
+
+        return json.dumps(response)
+
+
+class QueryResultRequest(BaseRequest):
+    def __init__(self, request):
+        self.job_id = request["job_id"]
+
+    def process(self, distributed_graph, executor):
+        response = {
+            "code": "OK",
+            "result": []
+        }
+
         return json.dumps(response)

@@ -61,7 +61,7 @@ def execute_query(query, server):
         status_request = {"code": "QueryStatus", "job_id": job_id}
         response = client.request(server, status_request)
         check_count += 1
-        if response["code"] != "OK" or response["status"] == "FAILED":
+        if response["code"] != "OK" or response["status"] == "Failed":
             failed = True
         elif response["status"] == "DONE":
             done = True
