@@ -25,7 +25,7 @@ class RequestServerThread(threading.Thread):
                 done = True
             else:
                 request = requests.parse_request(request_string)
-                response = request.process(self.distributed_graph)
+                response = request.process(self.distributed_graph, None)
                 connection.send(response)
                 connection.close()
 
