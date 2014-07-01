@@ -100,10 +100,15 @@ class LocalStatRequest(BaseRequest):
 
 
 class QueryExecuteRequest(BaseRequest):
+    def __init__(self, request):
+        self.query = request["query"]
+
     def process(self, distributed_graph, executor):
+        job_id = executor.start_job(self.query)
+
         response = {
             "code": "OK",
-            "job_id": 1
+            "job_id": job_id
         }
 
         return json.dumps(response)
@@ -114,9 +119,11 @@ class QueryStatusRequest(BaseRequest):
         self.job_id = request["job_id"]
 
     def process(self, distributed_graph, executor):
+        status = executor.get_job_status(self.job_id)
+
         response = {
             "code": "OK",
-            "status": "Failed"
+            "status": status
         }
 
         return json.dumps(response)
@@ -127,6 +134,8 @@ class QueryResultRequest(BaseRequest):
         self.job_id = request["job_id"]
 
     def process(self, distributed_graph, executor):
+        status = executor.get_job_result(self.job_id)
+
         response = {
             "code": "OK",
             "result": []

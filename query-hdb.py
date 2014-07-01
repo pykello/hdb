@@ -6,8 +6,8 @@ import os
 import sys
 import time
 
-STATUS_CHECK_INTERVAL = 0.5
-MAX_CHECK_COUNT = 8
+STATUS_CHECK_INTERVAL = 0.2
+MAX_CHECK_COUNT = 10
 
 def main():
     parser = argparse.ArgumentParser(description='HDB stop script')
@@ -63,7 +63,7 @@ def execute_query(query, server):
         check_count += 1
         if response["code"] != "OK" or response["status"] == "Failed":
             failed = True
-        elif response["status"] == "DONE":
+        elif response["status"] == "Done":
             done = True
         elif check_count == MAX_CHECK_COUNT:
             timed_out = True
