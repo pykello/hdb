@@ -2,18 +2,29 @@ import argparse
 import sys
 import graph
 import request_server
-
+from executor import Executor, ExecutorThread
 
 def main(argv):
     port, node_count_max, rel_count_max = parse_args(argv)
     local_addr = ('localhost', port)
     distributed_graph = graph.DistributedGraph(node_count_max, rel_count_max,
                                                local_addr)
+    executor = Executor(distributed_graph)
     server_thread = request_server.RequestServerThread(local_addr,
-                                                       distributed_graph)
+                                                       distributed_graph,
+                                                       executor)
+    executor_thread = ExecutorThread(executor)
 
     server_thread.start()
+    executor_thread.start()
+
+    # wait until request server is done
     server_thread.join()
+
+    # server thread is done, so we can also stop the executor thread
+    executor_thread.request_stop()
+    executor_thread.join()
+
     sys.exit(0)
 
 

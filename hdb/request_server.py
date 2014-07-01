@@ -5,10 +5,11 @@ import socket
 import json
 
 class RequestServerThread(threading.Thread):
-    def __init__(self, local_addr, distributed_graph):
+    def __init__(self, local_addr, distributed_graph, executor):
         super(RequestServerThread, self).__init__()
         self.distributed_graph = distributed_graph
         self.local_addr = local_addr
+        self.executor = executor
 
     def run(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,7 +26,7 @@ class RequestServerThread(threading.Thread):
                 done = True
             else:
                 request = requests.parse_request(request_string)
-                response = request.process(self.distributed_graph, None)
+                response = request.process(self.distributed_graph, self.executor)
                 connection.send(response)
                 connection.close()
 
