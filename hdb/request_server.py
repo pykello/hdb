@@ -48,7 +48,6 @@ class RequestServerThread(threading.Thread):
     def is_quit_request(self, request_string):
         try:
             code = json.loads(request_string)["code"]
-            print code
             if code == "Quit":
                 return True
             else:

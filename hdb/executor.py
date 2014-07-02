@@ -2,17 +2,15 @@ import threading
 import time
 import random
 from Queue import Queue, Empty
+import sys
+from task import TaskStatus, LocalTask, RemoteTask
 
-class JobStatus:
+class TaskStatus:
     READY = "Ready"
     RUNNING = "Running"
     DONE = "Done"
     FAILED = "Failed"
 
-class ExecutionQueueItem:
-    JOB = 1
-    LOCAL_TASK = 2
-    REMOTE_TASK = 3
 
 class ExecutorThread(threading.Thread):
     def __init__(self, executor):
@@ -38,41 +36,64 @@ class Executor:
         # our purposes.
         self.id_seq = SyncSeq(random.randint(0, 10**9))
 
-        self.job_status = SyncDict()
-        self.job_result = SyncDict()
+        self.task_status = SyncDict()
+        self.task_result = SyncDict()
 
-        self.queue = Queue()
+        self.task_queue = Queue()
 
     def process(self):
         try:
-            code, obj = self.queue.get_nowait()
-            if code == ExecutionQueueItem.JOB:
-                self.process_job(obj)
+            # we shouldn't infinitely block here, because otherwise executor 
+            # thread can become unstoppable. So, we use get_nowait() instead
+            # of get.
+            task = self.task_queue.get_nowait()
+
+            new_tasks = task.process()
+            for new_task in new_tasks:
+                if self.task_status.get(new_task.get_key()) is not None:
+                    new_task.status = TaskStatus.DONE
+                    continue
+                sys.stdout.flush()
+                self.task_status.set(new_task.get_key(), new_task.status)
+                self.task_result.set(new_task.get_key(), new_task.result)
+                self.task_queue.put(new_task)
+
+            self.task_status.set(task.get_key(), task.status)
+            self.task_result.set(task.get_key(), task.result)
+            if task.status not in (TaskStatus.DONE, TaskStatus.FAILED):
+                self.task_queue.put(task)
+
         except Empty:
-            time.sleep(1.5)
+            # in case the queue is empty, we sleep for a bit to avoid 100% cpu
+            # usage when there is nothing to do. Note that when a query comes
+            # in, until it succeeds or fails, there will be at least one task
+            # in task_queue and we won't sleep and will utilize the cpu as much
+            # as possible.
+            time.sleep(0.05)
 
     def start_job(self, query):
         job_id = self.id_seq.next()
-        root_task = None # this will be actually created later when processing
-        job = (job_id, query, root_task)
+        task_key = self.assign_task(job_id, query, 0, query[0][1])
 
-        self.job_status.set(job_id, JobStatus.READY)
-        self.job_result.set(job_id, None)
-        self.queue.put((ExecutionQueueItem.JOB, job))
+        return task_key
 
-        return job_id
+    def assign_task(self, job_id, query, query_index, node):
+        task = LocalTask(job_id, query, query_index, node, self.distributed_graph)
 
-    def process_job(self, job):
-        job_id, query, root_task = job
+        if self.task_status.get(task.get_key()) is None:
+            self.task_status.set(task.get_key(), task.status)
+            self.task_result.set(task.get_key(), task.result)
+            self.task_queue.put(task)
 
-        self.job_result.set(job_id, [])
-        self.job_status.set(job_id, JobStatus.DONE)
+        return task.get_key()
 
-    def get_job_status(self, job_id):
-        return self.job_status.get(job_id)
+    def get_task_status(self, task_key):
+        status = self.task_status.get(task_key)
+        return status
 
-    def get_job_result(self, job_id):
-        return self.job_result.get(job_id)
+    def get_task_result(self, task_key):
+        result = list(self.task_result.get(task_key))
+        return result
 
 
 class SyncDict:

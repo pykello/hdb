@@ -2,10 +2,14 @@ import argparse
 import sys
 import graph
 import request_server
+import random
 from executor import Executor, ExecutorThread
 
 def main(argv):
     port, node_count_max, rel_count_max = parse_args(argv)
+
+    random.seed()
+
     local_addr = ('localhost', port)
     distributed_graph = graph.DistributedGraph(node_count_max, rel_count_max,
                                                local_addr)

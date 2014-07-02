@@ -19,6 +19,10 @@ class DistributedGraph:
         server = self.bucket_map[bucketId]
         return tuple(server)
 
+    def is_node_local(self, node_id):
+        server_addr = self.locate_node(node_id)
+        return server_addr == self.local_addr
+
     def get_server_list(self):
         result = []
         for server in self.bucket_map:
@@ -30,11 +34,11 @@ class DistributedGraph:
         source_id = int(source_id)
         rel_type_id = int(rel_type_id)
         target_id = int(target_id)
-        server_addr = self.locate_node(source_id)
-
-        if server_addr == self.local_addr:
+        
+        if self.is_node_local(source_id):
             result = self.local_graph.add_relation(source_id, rel_type_id, target_id)
         else:
+            server_addr = self.locate_node(source_id)
             msg = {"code": "RelationAdd",
                    "relation": [source_id, rel_type_id, target_id]}
             response = client.request(server_addr, msg)

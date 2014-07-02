@@ -9,8 +9,9 @@ def parse_request(request_string):
         "RelationBatchAdd": RelationBatchAddRequest,
         "LocalStat": LocalStatRequest,
         "QueryExecute": QueryExecuteRequest,
-        "QueryStatus": QueryStatusRequest,
-        "QueryResult": QueryResultRequest,
+        "TaskAssign": TaskAssignRequest,
+        "TaskStatus": TaskStatusRequest,
+        "TaskResult": TaskResultRequest,
     }
 
     request = None
@@ -104,22 +105,42 @@ class QueryExecuteRequest(BaseRequest):
         self.query = request["query"]
 
     def process(self, distributed_graph, executor):
-        job_id = executor.start_job(self.query)
+        task_key = executor.start_job(self.query)
 
         response = {
             "code": "OK",
-            "job_id": job_id
+            "task_key": task_key
         }
 
         return json.dumps(response)
 
 
-class QueryStatusRequest(BaseRequest):
+class TaskAssignRequest(BaseRequest):
     def __init__(self, request):
+        self.query = request["query"]
         self.job_id = request["job_id"]
+        self.query_index = request["query_index"]
+        self.node = request["node"]
 
     def process(self, distributed_graph, executor):
-        status = executor.get_job_status(self.job_id)
+        task_key = executor.assign_task(self.job_id, self.query,
+                                        self.query_index,
+                                        self.node)
+
+        response = {
+            "code": "OK",
+            "task_key": task_key,
+        }
+
+        return json.dumps(response)
+
+
+class TaskStatusRequest(BaseRequest):
+    def __init__(self, request):
+        self.task_key = request["task_key"]
+
+    def process(self, distributed_graph, executor):
+        status = executor.get_task_status(self.task_key)
 
         response = {
             "code": "OK",
@@ -129,16 +150,16 @@ class QueryStatusRequest(BaseRequest):
         return json.dumps(response)
 
 
-class QueryResultRequest(BaseRequest):
+class TaskResultRequest(BaseRequest):
     def __init__(self, request):
-        self.job_id = request["job_id"]
+        self.task_key = request["task_key"]
 
     def process(self, distributed_graph, executor):
-        status = executor.get_job_result(self.job_id)
+        result = executor.get_task_result(self.task_key)
 
         response = {
             "code": "OK",
-            "result": []
+            "result": result
         }
 
         return json.dumps(response)

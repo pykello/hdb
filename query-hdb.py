@@ -6,8 +6,8 @@ import os
 import sys
 import time
 
-STATUS_CHECK_INTERVAL = 0.2
-MAX_CHECK_COUNT = 10
+STATUS_CHECK_INTERVAL = 0.05
+MAX_CHECK_COUNT = 40
 
 def main():
     parser = argparse.ArgumentParser(description='HDB stop script')
@@ -17,7 +17,11 @@ def main():
     server = ('localhost', args.port)
     bucket_map = client.get_bucket_map(server)
 
-    for line in sys.stdin:
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            break
+
         query = parse_query(line)
         if len(query) == 0:
             print "empty query"
@@ -28,7 +32,12 @@ def main():
 
         query_server = client.locate_node(query[0][1], bucket_map)
         query_result = execute_query(query, query_server)
-        print query_result
+
+        print line.strip()
+        if query_result["code"] == "OK":
+            print query_result["result"]
+        else:
+            print query_result["code"]
 
 
 def parse_query(line):
@@ -50,7 +59,7 @@ def execute_query(query, server):
     if response["code"] != "OK":
         return response
 
-    job_id = response["job_id"]
+    task_key = response["task_key"]
 
     # check status of query until it finishes or fails
     done = False
@@ -58,7 +67,7 @@ def execute_query(query, server):
     timed_out = False
     check_count = 0
     while not done and not failed and not timed_out:
-        status_request = {"code": "QueryStatus", "job_id": job_id}
+        status_request = {"code": "TaskStatus", "task_key": task_key}
         response = client.request(server, status_request)
         check_count += 1
         if response["code"] != "OK" or response["status"] == "Failed":
@@ -74,10 +83,10 @@ def execute_query(query, server):
         return response
 
     if timed_out:
-        return {"code": "TIMEDOUT"}
+        return {"code": "TimedOut"}
 
     # if not failed, the query succeeded and we can fetch the result
-    result_request = {"code": "QueryResult", "job_id": job_id}
+    result_request = {"code": "TaskResult", "task_key": task_key}
     response = client.request(server, result_request)
     return response
 

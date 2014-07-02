@@ -1,3 +1,7 @@
 test-launch
 test-load-1
 test-load-2
+test-empty-result
+test-query-1
+test-query-heap
+test-loop-and-cycle
